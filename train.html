@@ -1,0 +1,103 @@
+<html>
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body{
+          overflow:hidden;
+          background:#000;
+        }
+        #canvas {
+            
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+<body>
+       <canvas id="canvas"></canvas>
+       <script>
+       
+       class Сarriage {
+            constructor() {
+                
+            }
+        }
+        
+       class Train {
+            constructor(carriageNumber) {
+                this.carriages = [];
+                for (i = 0; i < carriageNumber; i++) {
+                    this.carriages.push(new Сarriage())
+                }
+            }
+        }
+       
+        class Railroad {
+            constructor() {
+                
+            }
+        }
+       
+       var w = window.innerWidth,
+        h = window.innerHeight;
+        var canvas = $('#canvas');
+        canvas.width(w);
+        canvas.height(h);
+        var ctx = canvas[0].getContext('2d');
+        ctx.canvas.width = w;
+        ctx.canvas.height = h;
+        
+        var formula = {};
+
+        formula.getPointOnLine = function(shift,points){
+            return [
+                (points[1][0] - points[0][0]) * (shift / 100) + points[0][0],
+                (points[1][1] - points[0][1]) * (shift / 100) + points[0][1]
+            ];
+        };
+
+        formula.getPointOnCurve = function(shift,points){
+            if(points.length == 2){
+                return this.getPointOnLine(shift,points);
+            }
+            var pointsPP = [];
+            for(var i = 1;i < points.length;i++){
+                pointsPP.push(this.getPointOnLine(shift,[
+                    points[i - 1],
+                    points[i]
+                ]));
+            }
+            return this.getPointOnCurve(shift,pointsPP);
+        };
+
+        var points = [
+                [100,100],
+                [500,500],
+                [1000,100]
+        ];
+
+        var shift = 0;
+        var step = 1;
+
+        for(i=0;i<100;i++) {
+            ctx.beginPath();
+            ctx.moveTo(points[0][0],points[0][1]);
+            if(shift > 100){
+                shift = 100;
+            }
+            for(var j = 0;j <= shift;j += step){
+                var coord = formula.getPointOnCurve(j,points);
+                ctx.lineTo(coord[0],coord[1]);
+            }
+            ctx.strokeStyle="red";
+            ctx.stroke();
+            ctx.closePath();
+            if(shift <= 100){
+                shift += step;
+            }
+        }
+    </script>
+</body>
+</html>

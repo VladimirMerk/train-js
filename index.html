@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Train</title>
+    <style>
+      html, body, .grid {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+      }
+      #railway {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      .grid {
+        background-image:
+          repeating-linear-gradient(0deg, transparent, transparent 9px, #CCC 9px, #CCC 10px),
+          repeating-linear-gradient(-90deg, transparent, transparent 9px, #CCC 9px, #CCC 10px);
+        background-size: 10px 10px;
+      }
+      .wagon {
+        border: 1px solid #000000;
+        background-color: #00a1ff;
+        opacity: 0.5;
+        border-top-color: #ff0000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid"></div>
+    <svg id="railway" height="400" width="450">
+      <path d="M 100 200 q 150 -300 300 0" stroke="red" stroke-width="1" fill="none" />
+      <!-- <circle r="99" stroke="#000" cy="100" cx="100" stroke-width="1" fill="none"/> -->
+    </svg>
+    <script type="module" src="./js/app.mjs"></script>
+  </body>
+</html>
