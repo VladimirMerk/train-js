@@ -97,8 +97,12 @@ class Wagon {
   }
 
   calculateDegrees() {
-    // Rewrite
-    return Math.atan2(this.velocity.x, this.velocity.y) * 180 / Math.PI;
+    const degrees = Math.atan2(
+      this.prevousVelocity.y - this.velocity.y,
+      this.prevousVelocity.x - this.velocity.x
+    ) * 180 / Math.PI;
+
+    return degrees;
   }
   draw() {
     const styleAttr = {
@@ -107,7 +111,7 @@ class Wagon {
       height: {value: this.size.height, unit: 'px'},
       left: {value: this.velocity.x, unit: 'px'},
       top: {value: this.velocity.y, unit: 'px'},
-      transform: {value: new CSSRotate(CSS.deg(this.calculateDegrees()))}
+      transform: {value: new CSSRotate(CSS.deg(this.calculateDegrees() - 180))}
     };
     if (! this.element) {
       this.element = document.createElement('div');
