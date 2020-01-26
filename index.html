@@ -11,8 +11,13 @@
       }
       #railway {
         position: absolute;
-        left: 0;
-        top: 0;
+        left: 0px;
+        top: 101px;
+      }
+      #railway-two {
+        position: absolute;
+        left: 321px;
+        top: 101px;
       }
       .grid {
         background-image:
@@ -30,10 +35,14 @@
     </style>
   </head>
   <body>
+    <input id="handler" type="range" min="0" max="300" value="0" />&nbsp;
+    <input id="loop" type="button" value="Play" />
     <div class="grid"></div>
     <svg id="railway" height="400" width="450">
-      <path d="M 100 200 q 150 -300 300 0" stroke="red" stroke-width="1" fill="none" />
-      <!-- <circle r="99" stroke="#000" cy="100" cx="100" stroke-width="1" fill="none"/> -->
+      <path d="M 10 200 q 150 -300 300 0" stroke="red" stroke-width="1" fill="none" />
+    </svg>
+    <svg id="railway-two" height="400" width="450">
+      <circle r="99" stroke="#000" cy="100" cx="100" stroke-width="1" fill="none"/>
     </svg>
     <script type="module" src="./js/app.mjs"></script>
   </body>

@@ -1,64 +1,69 @@
 class Train {
   constructor(wagonCount = 1) {
     this.wagons = this.buildWagons(wagonCount);
-    // this.path = [[50,50], [250,50]]
     this.path = null; // SVGPathElement
-    this.pathLength = 0;
-    this.speed = 5
-    this.direction = 1
+    this.speed = 5;
+    this.direction = 0;
   }
   buildWagons(wagonCount = 1) {
-    const wagons = new Array(wagonCount).fill(null)
-    return wagons.map(() => new Wagon())
+    const wagons = new Array(wagonCount).fill(null);
+    return wagons.map((n, index) => new Wagon(index + 1));
   }
 
   /**
-   * @param  {SVGPathElement} path
+   * @param  {SVGSVGElement} railway
    */
-  setRailway(path) {
-    this.path = path;
-    this.pathLength = path.getTotalLength();
+  setRailway(railway) {
+    this.path = railway.firstElementChild;
+    this.path.totalLength = this.path.getTotalLength();
+    this.path.isLoop = this.checkPathIsLoop();
+    this.path.offset = {
+      x: railway.computedStyleMap().get('left').value,
+      y:  railway.computedStyleMap().get('top').value
+    };
     this.setWagonsOnRailway();
   }
+  checkPathIsLoop() {
+    const startPoint = this.path.getPointAtLength(0);
+    const endPoint = this.path.getPointAtLength(this.path.totalLength);
+    return (startPoint.x === endPoint.x && startPoint.y === endPoint.y);
+  }
   setWagonsOnRailway() {
-    const trainWidth = this.getWidthTrain();
-    let buildTrainWidth = 0;
-    for (const wagon of this.wagons) {
-      const wagonSize = wagon.getSize();
-      const position = wagon.setPosition((trainWidth - buildTrainWidth) - wagonSize.width / 2);
-      const pointOnPath = this.path.getPointAtLength(position);
-      buildTrainWidth += wagonSize.width;
-      wagon.setVelocity(pointOnPath.x, pointOnPath.y);
+    for (const [index, wagon] of this.wagons.entries()) {
+      this.run(0);
+      this.draw();
     }
   }
-
   getWidthTrain() {
     return this.wagons.reduce((total, wagon) => {
-      return total + wagon.getSize().width
+      return total + wagon.getSize().width;
     }, 0);
   }
-  run() {
-    setInterval(() => {
-      for (const wagon of this.wagons) {
-        let position = wagon.getPosition();
-        position += (this.speed * this.direction);
-        wagon.setPosition(position);
-        const pointOnPath = this.path.getPointAtLength(position);
-        wagon.setVelocity(pointOnPath.x, pointOnPath.y);
+  run(n = 0) {
+    for (const wagon of this.wagons) {
+      const distance = n * this.speed;
+      const offset = wagon.getNumber() * wagon.getSize().width;
+      let position = distance + offset;
+      if (! this.path.isLoop) {
+        this.direction = Math.trunc((position) / this.path.totalLength) % 2;
+        position = Math.abs(
+          (this.path.totalLength * this.direction) - (position % this.path.totalLength)
+        );
+      } else {
+         position = position % this.path.totalLength;
       }
-      if (
-        this.wagons[0].getPosition() + this.wagons[0].getSize().width >= this.pathLength ||
-        this.wagons[this.wagons.length - 1].getPosition() <= 0
-      ) {
-        this.direction = -this.direction;
+      if (this.direction < 0) {
+        position = this.path.totalLength - (position % this.path.totalLength);
       }
-      this.draw();
-    }, 50)
+      const pointOnPath = this.path.getPointAtLength(position);
+      wagon.setVelocity(pointOnPath.x, pointOnPath.y);
+    }
+    this.draw();
   }
   draw() {
     const fragment = document.createDocumentFragment();
     for (const wagon of this.wagons) {
-      const el = wagon.draw();
+      const el = wagon.draw(this.path.offset.x, this.path.offset.y);
       fragment.appendChild(el);
     }
     document.body.appendChild(fragment);
@@ -66,9 +71,9 @@ class Train {
 }
 
 class Wagon {
-  constructor() {
+  constructor(number = 1) {
+    this.number = number;
     this.size = {width: 10, height: 10};
-    this.position = 0;
     this.velocity = {x: 0, y: 0};
     this.prevousVelocity = this.velocity;
     this.element = null;
@@ -78,6 +83,9 @@ class Wagon {
   }
   getVelocity() {
     return this.velocity
+  }
+  getNumber() {
+    return this.number
   }
   setVelocity(x = 0, y = 0) {
     this.prevousVelocity = {...this.velocity};
@@ -89,28 +97,20 @@ class Wagon {
       y - this.size.height / 2
     ];
   }
-  setPosition(position = 0) {
-    return this.position = position;
-  }
-  getPosition() {
-    return this.position;
-  }
-
   calculateDegrees() {
     const degrees = Math.atan2(
       this.prevousVelocity.y - this.velocity.y,
       this.prevousVelocity.x - this.velocity.x
     ) * 180 / Math.PI;
-
     return degrees;
   }
-  draw() {
+  draw(offsetX = 0, offsetY = 0) {
     const styleAttr = {
       position: {value: 'absolute'},
       width: {value: this.size.width, unit: 'px'},
       height: {value: this.size.height, unit: 'px'},
-      left: {value: this.velocity.x, unit: 'px'},
-      top: {value: this.velocity.y, unit: 'px'},
+      left: {value: this.velocity.x + offsetX, unit: 'px'},
+      top: {value: this.velocity.y + offsetY, unit: 'px'},
       transform: {value: new CSSRotate(CSS.deg(this.calculateDegrees() - 180))}
     };
     if (! this.element) {
